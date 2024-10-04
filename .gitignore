@@ -10,10 +10,8 @@
 
 *.DS_Store
 
-expe-passage/
-expe-jena/
-expe-sage/
-expe-blazegraph-baseline/
+wdbench-multiple-tps/
+wdbench-opts/
 
 
 *~
