@@ -1,0 +1,34 @@
+Query 8
+To continue query execution, use the following query:[0m
+[32mSELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q30> AS ?x2)
+              BIND("US" AS ?x5)
+              ?x1  <http://www.wikidata.org/prop/direct/P17>  ?x2
+            }
+          OFFSET  483694
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x2  <http://www.wikidata.org/prop/direct/P297>  ?x5 }
+          OFFSET  196
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P17>  ?x2
+      }
+    ?x1  <http://www.wikidata.org/prop/direct/P229>  ?x3 ;
+         <http://www.wikidata.org/prop/direct/P230>  ?x4 ;
+         <http://www.wikidata.org/prop/direct/P31>  <http://www.wikidata.org/entity/Q46970>
+    OPTIONAL
+      { ?x1  <http://www.wikidata.org/prop/direct/P432>  ?x6 }
+    OPTIONAL
+      { ?x1  <http://www.wikidata.org/prop/direct/P113>  ?x7 }
+    OPTIONAL
+      { ?x1  <http://www.wikidata.org/prop/direct/P856>  ?x8 }
+    OPTIONAL
+      { ?x1  <http://www.wikidata.org/prop/direct/P127>  ?x9 }
+  }
+[0m

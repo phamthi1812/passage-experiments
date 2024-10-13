@@ -1,0 +1,20 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q10883041> AS ?x1)
+              BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/Katanokita%20IC.jpg> AS ?x2)
+              ?x1  <http://www.wikidata.org/prop/direct/P625>  ?x3
+            }
+          OFFSET  0
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  2272129
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P625>  ?x3
+      }
+  }

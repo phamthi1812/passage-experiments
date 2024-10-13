@@ -60,26 +60,6 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.4.1</version>
                 <executions>
-                <!-- Jena CLI -->
-                <execution>
-                    <id>make-assembly-jena-cli</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>single</goal>
-                    </goals>
-                    <configuration>
-                        <archive>
-                            <manifest>
-                                <mainClass>or.apache.jena.JenaCli</mainClass>
-                            </manifest>
-                        </archive>
-                        <finalName>jena-cli</finalName>
-                        <descriptorRefs>
-                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
-                    </configuration>
-                </execution>
-
 
                     <execution>
                         <id>make-assembly-sage-benchmark</id> <!-- sage -->

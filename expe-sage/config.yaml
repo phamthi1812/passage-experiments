@@ -1,0 +1,26 @@
+# The name of the server
+name: SaGe Server
+# Server maintainer(s)
+maintainer: Chuck Norris
+# The public URL used to access the server
+public_url: http://server-url.com
+
+# Time quantum used by the server
+quota: 60000000
+
+graphs:
+  -
+    name: wdbench
+    uri: http://example.org/wdbench
+    description: The wdbench dataset
+    # Type of backend
+    backend: hdt-file
+    # Path to the HDT file
+    file: /datasets/wdbench/wdbench.hdt
+    # Example queries that can be executed using this dataset
+    queries:
+      - name: "Every RDF triples"
+        value: |
+          SELECT * WHERE {
+            ?s ?p ?o.
+          }

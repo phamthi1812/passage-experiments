@@ -1,0 +1,21 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q131234> AS ?x1)
+              BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/CSKA-RM18%20%287%29%20%28cropped%29.jpg> AS ?x2)
+              ?x1  <http://www.wikidata.org/prop/direct/P569>  ?x3
+            }
+          OFFSET  0
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  3409655
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P569>  ?x3
+      }
+    ?x1  <http://www.wikidata.org/prop/direct/P31>  <http://www.wikidata.org/entity/Q5>
+  }

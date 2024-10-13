@@ -1,0 +1,26 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q183> AS ?x2)
+              BIND(<http://www.wikidata.org/entity/Q15819121> AS ?x3)
+              ?x1  <http://www.wikidata.org/prop/direct/P17>  ?x2
+            }
+          OFFSET  731248
+        }
+      }
+    UNION
+      { { { { SELECT  *
+              WHERE
+                { ?x3  <http://www.wikidata.org/prop/direct/P31>  <http://www.wikidata.org/entity/Q2485448> }
+              OFFSET  2935
+            }
+            ?x3  <http://www.wikidata.org/prop/direct/P641>  <http://www.wikidata.org/entity/Q847>
+          }
+          ?x3  <http://www.wikidata.org/prop/direct/P17>  ?x2
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P17>  ?x2
+      }
+    ?x1  <http://www.wikidata.org/prop/direct/P31>  <http://www.wikidata.org/entity/Q1194951> ;
+         <http://www.wikidata.org/prop/direct/P641>  <http://www.wikidata.org/entity/Q847>
+  }

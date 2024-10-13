@@ -1,0 +1,21 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q212> AS ?x2)
+              BIND("UA" AS ?x3)
+              ?x1  <http://www.wikidata.org/prop/direct/P17>  ?x2
+            }
+          OFFSET  89535
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x2  <http://www.wikidata.org/prop/direct/P297>  ?x3 }
+          OFFSET  171
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P17>  ?x2
+      }
+    ?x1  <http://www.wikidata.org/prop/direct/P31>  <http://www.wikidata.org/entity/Q486972>
+  }

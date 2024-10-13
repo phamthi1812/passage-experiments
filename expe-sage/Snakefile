@@ -1,0 +1,128 @@
+import os
+import glob
+from pathlib import Path
+
+# Configurable CPU count for Docker
+PARENT_DIR = "/GDD/experiments/sage-jena-benchmarks"
+
+cpus = config.get("cpus", 1)
+
+query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
+run_ids = config.get("run_ids", ["run_1","run_2", "run_3"])
+timeouts = config.get("timeouts", [60000,60000000])  # 1 minute, could be 2 minutes, 1 hour (like notimeout)
+
+
+# Function to collect queries from each QUERY_DIR
+def get_queries(query_dir):
+    return [Path(f).stem for f in glob.glob(f"{PARENT_DIR}/selected_queries/{query_dir}/*.sparql")]
+
+
+rule all:
+    input:
+        expand(f"{PARENT_DIR}/expe-sage/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv",
+               query_dir=query_dirs, cpus=[cpus])
+
+
+rule execute_one_query:
+    input:
+        img=f"{PARENT_DIR}/expe-sage/docker/sage-latest.tar",
+        data=f"{PARENT_DIR}/datasets/wdbench",
+        config_file=f"{PARENT_DIR}/expe-sage/config.yaml",
+        query=lambda wildcards: f"{PARENT_DIR}/selected_queries/{wildcards.query_dir}/{wildcards.query}.sparql"
+    output:
+        result=temp(f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.dat"),
+        nb_results=temp(f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.nb.dat"),
+        time=temp(f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.time.dat")
+    run:
+        query_name = Path(input.query).stem
+        docker_config = "/config.yaml"
+        docker_query_file = f"/{Path(input.query).name}"
+        docker_result = f"/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}/{query_name}.dat"
+        docker_nb_results = f"/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}/{query_name}.nb.dat"
+        docker_time = f"/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}/{query_name}.time.dat"
+        launch_file = f"{PARENT_DIR}/expe-sage/launch.sh"
+
+        with open(launch_file, "w") as launch:
+            launch.write(f"""#!/bin/bash
+sage-exec {docker_config} http://example.org/wdbench -f {docker_query_file} --timeout {wildcards.timeout} &> {docker_result}
+
+# Extract values from the last line of docker_result
+last_line=$(tail -n 1 {docker_result})
+nb_quantum=$(echo "$last_line" | awk -F'[,:]' '{{gsub(/[^0-9.]/,"",$2); print $2}}')
+nb_results=$(echo "$last_line" | awk -F'[,:]' '{{gsub(/[^0-9.]/,"",$4); print $4}}')
+next_size=$(echo "$last_line" | awk -F'[,:]' '{{gsub(/[^0-9.]/,"",$6); print $6}}')
+execution_time=$(echo "$last_line" | awk -F'[,:]' '{{gsub(/[^0-9.]/,"",$8); print $8}}')
+
+# Write nb_results to nb_results file
+echo "$nb_results" > {docker_nb_results}
+
+# Write nb_quantum, next_size, and execution time to time file
+echo "nb_quantum: $nb_quantum" > {docker_time}
+echo "next_size: $next_size kb" >> {docker_time}
+echo "execution time: $execution_time sec" >> {docker_time}
+""")
+
+        os.makedirs(f"{PARENT_DIR}/expe-sage/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}", exist_ok=True)
+
+        shell(f"""
+        docker load < {input.img} &&
+        docker run --rm --cpuset-cpus="0-{int(wildcards.cpus)-1}" --memory="54G" \
+        -v {input.data}:/datasets/wdbench \
+        -v {input.config_file}:{docker_config} \
+        -v {input.query}:{docker_query_file} \
+        -v {PARENT_DIR}/expe-sage/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}:/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id} \
+        -v {launch_file}:/app/launch.sh \
+        --name sage-engine-optional-embedded sage-engine-optional-embedded:latest /bin/bash -c "chmod a+x /app/launch.sh && /app/launch.sh"
+        """)
+
+
+rule join_data_for_query_over_sage_embedded:
+    input:
+        nb_results=f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.nb.dat",
+        time=f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.time.dat"
+    output:
+        out=f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.csv"
+    run:
+        with open(input.nb_results, "r") as nb_results_file:
+            nb_results = int(nb_results_file.read().strip())
+
+        with open(input.time, "r") as time_file:
+            # Assuming time file has nb_quantum, next_size, and execution time in separate lines
+            lines = time_file.readlines()
+            nb_quantum = lines[0].split(":")[1].strip()
+            next_size = lines[1].split(":")[1].strip()
+            execution_time = lines[2].split(":")[1].strip()
+
+        with open(output.out, "w") as output_file:
+            output_file.write("nb_results,nb_quantum,next_size(kb),execution_time(sec)\n")
+            output_file.write(f"{nb_results},{nb_quantum},{next_size},{execution_time}\n")
+
+
+rule all_queries_and_collect_final_csv_embedded:
+    input:
+        lambda wildcards: expand(
+            f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.csv",
+            query_dir=wildcards.query_dir,
+            query=get_queries(wildcards.query_dir),
+            cpus=[cpus],
+            run_id=run_ids,
+            timeout=timeouts
+        )
+    output:
+        final_csv=f"{PARENT_DIR}/expe-sage/{{query_dir}}/report-{{query_dir}}-{{run_id}}.csv"
+    run:
+        with open(output.final_csv, "w") as final_output:
+            final_output.write("query_name,timeout,run_id,cpus,nb_results,nb_quantum,next_size(kb),execution_time(sec)\n")
+            for csv_file in input:
+                run_id = Path(csv_file).parent.name
+                timeout = Path(csv_file).parent.parent.name
+                cpu = Path(csv_file).parent.parent.parent.name
+                if Path(csv_file).exists():
+                    with open(csv_file, "r") as query_csv:
+                        lines = query_csv.readlines()
+                        if len(lines) > 1:
+                            data_line = lines[1].strip()  # Get data from the second line
+                            query_name = Path(csv_file).stem
+                            final_output.write(f"{query_name},{timeout},{run_id},{cpu},{data_line}\n")
+
+        print(f"Final CSV has been collected at {output.final_csv}")

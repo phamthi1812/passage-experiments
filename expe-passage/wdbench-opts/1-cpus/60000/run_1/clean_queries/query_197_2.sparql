@@ -1,0 +1,17 @@
+SELECT  *
+WHERE
+  {   { BIND(<http://www.wikidata.org/entity/Q654344> AS ?x1)
+        BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/Ariadaeus%20crater%204090%20h1.jpg> AS ?x2)
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  3436724
+        }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P587>  ?x3 }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+      }
+  }

@@ -1,0 +1,113 @@
+import os
+import glob
+from pathlib import Path
+
+# Configurable CPU count for Docker
+PARENT_DIR = "/GDD/sage-jena-benchmarks"
+
+cpus = config.get("cpus", 1)
+
+query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
+run_ids = config.get("run_ids", ["run_1", "run_2", "run_3"])
+
+# Function to collect queries from each QUERY_DIR
+def get_queries(query_dir):
+    return [Path(f).stem for f in glob.glob(f"{PARENT_DIR}/selected_queries/{query_dir}/*.sparql")]
+
+rule all:
+    input:
+        expand(f"{PARENT_DIR}/expe-jena/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv", run_id=run_ids, query_dir=query_dirs, cpus=[cpus])
+
+
+rule execute_one_query:
+    input:
+        img=f"{PARENT_DIR}/expe-jena/docker/jena-latest.tar",
+        data=f"{PARENT_DIR}/datasets/WDBench",
+        query=lambda wildcards: f"{PARENT_DIR}/selected_queries/{wildcards.query_dir}/{wildcards.query}.sparql"
+    output:
+        result=temp(f"{PARENT_DIR}/expe-jena/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.dat"),
+        nb_results=temp(f"{PARENT_DIR}/expe-jena/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.nb.dat"),
+        time=temp(f"{PARENT_DIR}/expe-jena/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.time.dat")
+    run:
+        query_name = Path(input.query).stem
+        docker_query_file = f"/{Path(input.query).name}"
+        docker_result = f"/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id}/{query_name}.dat"
+        docker_nb_results = f"/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id}/{query_name}.nb.dat"
+        docker_time = f"/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id}/{query_name}.time.dat"
+        launch_file = f"{PARENT_DIR}/expe-jena/launch.sh"
+
+        shell("""sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' """)
+        with open(launch_file, "w") as launch:
+            launch.write(f"""#!/bin/bash
+cd /app/apache-jena-5.1.0/bin
+export JAVA_OPTIONS="-Xmx52G"
+timeout 600s ./tdb2.tdbquery --loc=/tdb2-wdbench --file={docker_query_file} --time &> {docker_result}
+exit_status=$?
+if [ $exit_status -eq 124 ]; then
+    echo "Timeout" > {docker_result}
+    echo 0 > {docker_nb_results}
+    echo 0 > {docker_time}
+else
+    nb_lines=$(($(wc -l < {docker_result}) - 4))
+    if [ $nb_lines -lt 0 ]; then nb_lines=0; fi
+    echo $nb_lines > {docker_nb_results}
+    tail -n 1 {docker_result} | grep "Time:" | awk '{{print $2}}' >> {docker_time}
+fi
+""")
+
+        os.makedirs(f"{PARENT_DIR}/expe-jena/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id}", exist_ok=True)
+
+        shell(f"""
+        docker load < {input.img} &&
+        docker run --rm --cpuset-cpus="0-{cpus-1}" --memory="54G" \
+        -v {input.data}:/tdb2-wdbench \
+        -v {input.query}:{docker_query_file} \
+        -v {PARENT_DIR}/expe-jena/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id}:/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id} \
+        -v {launch_file}:/app/launch.sh \
+        --name jena jena:latest /bin/bash -c "chmod a+x /app/launch.sh && /app/launch.sh"
+        """)
+
+rule join_data_for_query_over_jena_embedded:
+    input:
+        nb_results=f"{PARENT_DIR}/expe-jena/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.nb.dat",
+        time=f"{PARENT_DIR}/expe-jena/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.time.dat"
+    output:
+        out=f"{PARENT_DIR}/expe-jena/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.csv"
+    run:
+        with open(input.nb_results, "r") as nb_results_file:
+            nb_results = int(nb_results_file.read().strip())
+
+        with open(input.time, "r") as time_file:
+            time_as_string = time_file.read().strip()
+
+        with open(output.out, "w") as output_file:
+            output_file.write("nb_results execution_time(ms)\n")
+            output_file.write(f"{nb_results} {time_as_string}\n")
+
+rule all_queries_and_collect_final_csv_embedded:
+    input:
+        lambda wildcards: expand(
+                    f"{PARENT_DIR}/expe-jena/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.csv",
+                    query_dir=wildcards.query_dir,
+                    query=get_queries(wildcards.query_dir),
+                    cpus=wildcards.cpus,
+                    run_id=run_ids
+        )
+    output:
+        final_csv=f"{PARENT_DIR}/expe-jena/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv"
+    run:
+
+        with open(output.final_csv, "w") as final_output:
+            final_output.write("query_name run cpus nb_results execution_time(ms)\n")
+            for csv_file in input:
+                run_id = Path(csv_file).parent.name
+                cpu = Path(csv_file).parent.parent.name
+                if Path(csv_file).exists():
+                    with open(csv_file, "r") as query_csv:
+                        lines = query_csv.readlines()
+                        if len(lines) > 1:
+                            data_line = lines[1].strip()  # Get data from the second line
+                            query_name = Path(csv_file).stem
+                            final_output.write(f"{query_name} {run_id} {cpu} {data_line}\n")
+
+        print(f"Final CSV has been collected at {output.final_csv}")

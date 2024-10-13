@@ -1,0 +1,20 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q13028327> AS ?x1)
+              BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/%D0%90%D0%BB%D1%8F%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%20%D0%90%D1%81%D1%82%D1%80%D0%B0%D0%BC%D0%BE%D0%B2%D1%96%D1%87%20%28%D0%90%D0%BD%D0%B4%D1%80%D1%8D%D0%B9%20%D0%97%D1%8F%D0%B7%D1%8E%D0%BB%D1%8F%29.jpg> AS ?x2)
+              ?x1  <http://www.wikidata.org/prop/direct/P31>  ?x3
+            }
+          OFFSET  0
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  3864721
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P31>  ?x3
+      }
+  }

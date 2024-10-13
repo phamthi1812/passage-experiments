@@ -1,0 +1,88 @@
+import os
+import glob
+from pathlib import Path
+
+cpus = config.get("cpus", 4)
+PARENT_DIR = "/GDD/experiments/sage-jena-benchmarks"
+query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
+run_ids = config.get("run_ids",["run_1","run_2","run_3"] )# ["run_4"]
+timeouts = config.get("timeouts", [60000, 60000000]) # 1 minute, could be 2 minutes, 1 hour( like notimeout)
+
+def get_queries(query_dir):
+    return [Path(f).stem for f in glob.glob(f"{PARENT_DIR}/selected_queries/{query_dir}/*.sparql")]
+
+rule all:
+    input:
+        expand(f"{PARENT_DIR}/expe-passage/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus-check.csv", run_id=run_ids, query_dir=query_dirs, cpus=[cpus])
+
+
+rule execute_one_query:
+    input:
+        img=f"{PARENT_DIR}/expe-passage/docker/passage-latest.tar",
+        jar=f"{PARENT_DIR}/expe-passage/sager-jar-with-dependencies.jar",
+        data=f"{PARENT_DIR}/datasets/wdbench-blaze/wdbench-blaze.jnl",
+        query=lambda wildcards: f"{PARENT_DIR}/selected_queries/{wildcards.query_dir}/{wildcards.query}.sparql"
+    output:
+        result=temp(f"{PARENT_DIR}/expe-passage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.dat"),
+        report_csv=f"{PARENT_DIR}/expe-passage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.csv"
+    run:
+        query_name = Path(input.query).stem
+        result_subdir = f"{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}"
+        docker_query_file = f"/{Path(input.query).name}"
+        docker_result = f"/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}/{query_name}.dat"
+        launch_file = f"{PARENT_DIR}/expe-passage/launch.sh"
+        with open(launch_file, "w") as launch:
+            launch.write(f"""#!/bin/bash
+java -jar -Xmx52G /app/passage.jar --database=/blazegraph.jnl --file={docker_query_file} --timeout={wildcards.timeout} --loop=True --report &> {docker_result}""")
+        os.makedirs(f"{PARENT_DIR}/expe-passage/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}", exist_ok=True)
+
+        shell(f"""
+        docker load < {input.img} &&
+        docker run --rm --cpuset-cpus="0-{cpus-1}" --memory="54G" \
+        -v {input.data}:/blazegraph.jnl \
+        -v {input.query}:{docker_query_file} \
+        -v {PARENT_DIR}/expe-passage/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id}:/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.timeout}/{wildcards.run_id} \
+        -v {launch_file}:/app/launch.sh \
+        --name passage passage:latest /bin/bash -c "chmod a+x /app/launch.sh && /app/launch.sh"
+        """)
+        shell(f"""python3 extract_queries_and_reports.py {output.result} {wildcards.query} {output.report_csv} {PARENT_DIR} {result_subdir}""")
+        shell(f"""python3 clean_query.py
+rule aggregate_report_data:
+    input:
+        lambda wildcards: expand(
+                            f"{PARENT_DIR}/expe-passage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.csv",
+                            query_dir=wildcards.query_dir,
+                            query=get_queries(wildcards.query_dir),
+                            cpus=wildcards.cpus,
+                            timeout=timeouts,
+                            run_id=run_ids
+                )
+    output:
+        final_csv=f"{PARENT_DIR}/expe-passage/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv"
+    run:
+        report_data = []
+        for csv_file in input:
+            query_name = os.path.splitext(os.path.basename(csv_file))[0]
+
+            timeout = Path(csv_file).parent.parent.name
+            run_id = Path(csv_file).parent.name
+            with open(csv_file, 'r') as f:
+                content = f.read()
+
+            num_pause_resume = None
+            execution_time = None
+            num_results = None
+            for line in content.splitlines():
+                if "TOTAL number of pause/resume" in line:
+                    num_pause_resume = line.split(":")[1].strip()
+                elif "TOTAL execution time" in line:
+                    execution_time = line.split(":")[1].strip().replace(" ms", "")
+                elif "TOTAL number of results" in line:
+                    num_results = line.split(":")[1].strip()
+
+            if num_pause_resume and execution_time and num_results:
+                report_data.append(f"{query_name},{run_id},{timeout},{num_pause_resume},{execution_time},{num_results}\n")
+
+        with open(output.final_csv, 'w') as out_csv:
+            out_csv.write("query_name,run,timeout,nb_pause_resume,execution_time,nb_results\n")
+            out_csv.writelines(report_data)

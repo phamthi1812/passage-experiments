@@ -8,7 +8,7 @@ PARENT_DIR = "/GDD/Thi/sage-jena-benchmarks"
 cpus = config.get("cpus", 1)
 
 query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
-run_ids = config.get("run_ids", ["run_1","run_2","run_3","run_4"])
+run_ids = config.get("run_ids", ["run_1","run_2","run_3"])
 
 # Function to collect queries from each QUERY_DIR
 def get_queries(query_dir):
@@ -16,13 +16,13 @@ def get_queries(query_dir):
 
 rule all:
     input:
-        expand(f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus-check.csv", run_id=run_ids, query_dir=query_dirs, cpus=[cpus])
+        expand(f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv", run_id=run_ids, query_dir=query_dirs, cpus=[cpus])
 
 
 rule execute_one_query:
     input:
-        img=f"{PARENT_DIR}/expe-blazegraph-baseline/docker/blazegraph-latest.tar",
-        jar=f"{PARENT_DIR}/expe-blazegraph-baseline/embedded-blazegraph-jar-with-dependencies.jar",
+        img=f"{PARENT_DIR}/expe-blazegraph-baseline/docker/bg-cli.tar",
+        jar=f"{PARENT_DIR}/expe-blazegraph-baseline/blazegraph-cli.jar",
         data=f"{PARENT_DIR}/datasets/wdbench-blaze/blazegraph.jnl",
         query=lambda wildcards: f"{PARENT_DIR}/selected_queries/{wildcards.query_dir}/{wildcards.query}.sparql"
     output:
@@ -40,7 +40,7 @@ rule execute_one_query:
         # Writing the launch script for Blazegraph execution
         with open(launch_file, "w") as launch:
             launch.write(f"""#!/bin/bash
-java -jar -Xmx54G /app/blazegraph.jar --database=/blazegraph.jnl --file={docker_query_file} &> {docker_result}
+java -jar -Xmx52G /app/blazegraph-cli.jar --database=/blazegraph.jnl --file={docker_query_file} &> {docker_result}
 if grep -q "Query timed out after" {docker_result}; then
     timeout_value=$(grep -oP 'Query timed out after \\K[0-9]+' {docker_result})
     echo 0 > {docker_nb_results}
@@ -59,12 +59,12 @@ fi
         # Running the Docker container for Blazegraph execution
         shell(f"""
         docker load < {input.img} &&
-        docker run --rm --cpuset-cpus="0-{cpus-1}" --memory="56G" \
+        docker run --rm --cpuset-cpus="0-{cpus-1}" --memory="54G" \
         -v {input.data}:/blazegraph.jnl \
         -v {input.query}:{docker_query_file} \
         -v {PARENT_DIR}/expe-blazegraph-baseline/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id}:/{wildcards.query_dir}/{wildcards.cpus}-cpus/{wildcards.run_id} \
         -v {launch_file}:/app/launch.sh \
-        --name blazegraph blazegraph:latest /bin/bash -c "chmod a+x /app/launch.sh && /app/launch.sh"
+        --name bg-cli bg-cli /bin/bash -c "chmod a+x /app/launch.sh && /app/launch.sh"
         """)
 
 rule join_data_for_query_over_blazegraph_embedded:
@@ -94,7 +94,7 @@ rule all_queries_and_collect_final_csv_embedded:
                     run_id=run_ids
         )
     output:
-        final_csv=f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus-check.csv"
+        final_csv=f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv"
     run:
         print(f"Total number of CSV files: {len(input)}")
         print(f"Collecting final CSV for {input}")
@@ -108,7 +108,7 @@ rule all_queries_and_collect_final_csv_embedded:
                     with open(csv_file, "r") as query_csv:
                         lines = query_csv.readlines()
                         if len(lines) > 1:
-                            data_line = lines[1].strip()  # Get data from the second line
+                            data_line = lines[1].strip()
                             query_name = Path(csv_file).stem
                             final_output.write(f"{query_name} {run_id} {cpu} {data_line}\n")
 

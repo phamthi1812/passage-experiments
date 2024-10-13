@@ -1,0 +1,20 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q44106011> AS ?x1)
+              BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/Common%20Voice%20home%20page%2004-2021.png> AS ?x2)
+              ?x1  <http://www.wikidata.org/prop/direct/P31>  ?x3
+            }
+          OFFSET  1
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  1953396
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P31>  ?x3
+      }
+  }

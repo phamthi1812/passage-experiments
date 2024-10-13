@@ -1,0 +1,27 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q47471525> AS ?x1)
+              BIND("2006-12-01T00:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> AS ?x3)
+              ?x1  <http://www.wikidata.org/prop/direct/P569>  ?x2
+            }
+          OFFSET  0
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P570>  ?x3 }
+          OFFSET  2214666
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P569>  ?x2
+      }
+    ?x1  <http://www.wikidata.org/prop/direct/P31>  <http://www.wikidata.org/entity/Q5>
+    OPTIONAL
+      { ?x1  <http://www.wikidata.org/prop/direct/P19>  ?x4 }
+    OPTIONAL
+      { ?x1  <http://www.wikidata.org/prop/direct/P19>  ?x4 }
+    OPTIONAL
+      { ?x1  <http://www.wikidata.org/prop/direct/P854>  ?x5 }
+  }

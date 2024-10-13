@@ -1,0 +1,9 @@
+SELECT  *
+WHERE
+  { { SELECT  *
+      WHERE
+        { ?x1  <http://www.wikidata.org/prop/direct/P225>  ?x3 }
+      OFFSET  2684172
+    }
+    ?x1  <http://www.wikidata.org/prop/direct/P171>  ?x2
+  }

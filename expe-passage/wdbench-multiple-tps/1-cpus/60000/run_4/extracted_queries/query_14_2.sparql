@@ -1,0 +1,12 @@
+Query 2
+To continue query execution, use the following query:[0m
+[32mSELECT  *
+WHERE
+  { { SELECT  *
+      WHERE
+        { ?x1  <http://www.wikidata.org/prop/direct/P105>  <http://www.wikidata.org/entity/Q7432> }
+      OFFSET  1573197
+    }
+    ?x1  <http://www.wikidata.org/prop/direct/P225>  ?x2
+  }
+[0m

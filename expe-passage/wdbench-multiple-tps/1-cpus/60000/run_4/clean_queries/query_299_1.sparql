@@ -1,0 +1,20 @@
+SELECT  *
+WHERE
+  {   { { SELECT  *
+          WHERE
+            { BIND(<http://www.wikidata.org/entity/Q5747167> AS ?x1)
+              BIND("Heterodraba" AS ?x3)
+              ?x1  <http://www.wikidata.org/prop/direct/P171>  ?x2
+            }
+          OFFSET  0
+        }
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P225>  ?x3 }
+          OFFSET  1634848
+        }
+        ?x1  <http://www.wikidata.org/prop/direct/P171>  ?x2
+      }
+  }

@@ -1,0 +1,15 @@
+Number of pause/resume: 0
+Execution time: 60000 ms
+Number of results: 3855197
+
+Number of pause/resume: 1
+Execution time: 60146 ms
+Number of results: 4633535
+
+Number of pause/resume: 2
+Execution time: 9167 ms
+Number of results: 706577
+
+TOTAL number of pause/resume: 2
+TOTAL execution time: 129313 ms
+TOTAL number of results: 9195309

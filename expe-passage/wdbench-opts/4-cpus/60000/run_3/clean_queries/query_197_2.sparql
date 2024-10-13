@@ -1,0 +1,17 @@
+SELECT  *
+WHERE
+  {   { BIND(<http://www.wikidata.org/entity/Q1676358> AS ?x1)
+        BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/Inhaber%20ledermayer%201907.jpg> AS ?x2)
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  3477617
+        }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P587>  ?x3 }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+      }
+  }

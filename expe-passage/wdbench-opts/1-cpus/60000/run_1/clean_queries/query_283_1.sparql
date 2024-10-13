@@ -1,0 +1,97 @@
+SELECT  *
+WHERE
+  {   { BIND(<http://www.wikidata.org/entity/Q14523264> AS ?x1)
+        BIND("2014-09-08T00:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> AS ?x3)
+        BIND(<http://www.wikidata.org/entity/Q720615> AS ?x4)
+        BIND(<http://www.wikidata.org/entity/Q8060892> AS ?x5)
+        BIND(<http://www.wikidata.org/entity/Q20894804> AS ?x6)
+        BIND(<http://www.wikidata.org/entity/Q6834774> AS ?x7)
+        OPTIONAL
+          { { SELECT  ?x8
+              WHERE
+                { SELECT  *
+                  WHERE
+                    { BIND(<http://www.wikidata.org/entity/Q14523264> AS ?x1)
+                      BIND("2014-09-08T00:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> AS ?x3)
+                      BIND(<http://www.wikidata.org/entity/Q720615> AS ?x4)
+                      BIND(<http://www.wikidata.org/entity/Q8060892> AS ?x5)
+                      BIND(<http://www.wikidata.org/entity/Q20894804> AS ?x6)
+                      BIND(<http://www.wikidata.org/entity/Q6834774> AS ?x7)
+                      ?x1  <http://www.wikidata.org/prop/direct/P674>  ?x8
+                    }
+                  OFFSET  0
+                }
+            }
+          }
+      }
+    UNION
+      {   { { SELECT  *
+              WHERE
+                { BIND(<http://www.wikidata.org/entity/Q14523264> AS ?x1)
+                  BIND("2014-09-08T00:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> AS ?x3)
+                  BIND(<http://www.wikidata.org/entity/Q720615> AS ?x4)
+                  BIND(<http://www.wikidata.org/entity/Q8060892> AS ?x5)
+                  BIND(<http://www.wikidata.org/entity/Q20894804> AS ?x6)
+                  ?x1  <http://www.wikidata.org/prop/direct/P162>  ?x7
+                }
+              OFFSET  2
+            }
+          }
+        UNION
+          {   { { SELECT  *
+                  WHERE
+                    { BIND(<http://www.wikidata.org/entity/Q14523264> AS ?x1)
+                      BIND("2014-09-08T00:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> AS ?x3)
+                      BIND(<http://www.wikidata.org/entity/Q720615> AS ?x4)
+                      BIND(<http://www.wikidata.org/entity/Q8060892> AS ?x5)
+                      ?x1  <http://www.wikidata.org/prop/direct/P58>  ?x6
+                    }
+                  OFFSET  1
+                }
+              }
+            UNION
+              {   { { SELECT  *
+                      WHERE
+                        { BIND(<http://www.wikidata.org/entity/Q14523264> AS ?x1)
+                          BIND("2014-09-08T00:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> AS ?x3)
+                          BIND(<http://www.wikidata.org/entity/Q720615> AS ?x4)
+                          ?x1  <http://www.wikidata.org/prop/direct/P161>  ?x5
+                        }
+                      OFFSET  15
+                    }
+                  }
+                UNION
+                  {   { { SELECT  *
+                          WHERE
+                            { BIND(<http://www.wikidata.org/entity/Q14523264> AS ?x1)
+                              ?x1  <http://www.wikidata.org/prop/direct/P577>  ?x3
+                            }
+                          OFFSET  1
+                        }
+                      }
+                    UNION
+                      { { SELECT  *
+                          WHERE
+                            { ?x1  <http://www.wikidata.org/prop/direct/P31>  <http://www.wikidata.org/entity/Q11424> }
+                          OFFSET  214970
+                        }
+                        OPTIONAL
+                          { ?x1  <http://www.wikidata.org/prop/direct/P921>  ?x2 }
+                        OPTIONAL
+                          { ?x1  <http://www.wikidata.org/prop/direct/P577>  ?x3 }
+                      }
+                    OPTIONAL
+                      { ?x1  <http://www.wikidata.org/prop/direct/P57>  ?x4 }
+                    OPTIONAL
+                      { ?x1  <http://www.wikidata.org/prop/direct/P161>  ?x5 }
+                  }
+                OPTIONAL
+                  { ?x1  <http://www.wikidata.org/prop/direct/P58>  ?x6 }
+              }
+            OPTIONAL
+              { ?x1  <http://www.wikidata.org/prop/direct/P162>  ?x7 }
+          }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P674>  ?x8 }
+      }
+  }

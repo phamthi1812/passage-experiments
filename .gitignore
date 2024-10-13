@@ -10,8 +10,6 @@
 
 *.DS_Store
 
-wdbench-multiple-tps/
-wdbench-opts/
 
 
 *~

@@ -1,0 +1,20 @@
+Query 2
+To continue query execution, use the following query:[0m
+[32mSELECT  *
+WHERE
+  {   { BIND(<http://www.wikidata.org/entity/Q2548176> AS ?x1)
+        BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/Semeliskiu%20panorama.jpg> AS ?x2)
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  2603862
+        }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P587>  ?x3 }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+      }
+  }
+[0m

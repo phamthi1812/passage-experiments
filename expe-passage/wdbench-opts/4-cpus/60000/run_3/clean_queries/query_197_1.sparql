@@ -1,0 +1,17 @@
+SELECT  *
+WHERE
+  {   { BIND(<http://www.wikidata.org/entity/Q8019114> AS ?x1)
+        BIND(<http://commons.wikimedia.org/wiki/Special:FilePath/William%20T.%20Piper.jpg> AS ?x2)
+      }
+    UNION
+      { { SELECT  *
+          WHERE
+            { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+          OFFSET  1788447
+        }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P587>  ?x3 }
+        OPTIONAL
+          { ?x1  <http://www.wikidata.org/prop/direct/P18>  ?x2 }
+      }
+  }
