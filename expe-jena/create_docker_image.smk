@@ -1,10 +1,12 @@
 
-PARENT_DIR = "/GDD/Thi/sage-jena-benchmarks"
 
-rule create_jena_image:
+PARENT_DIR = "/GDD/experiments/sage-jena-benchmarks"
+
+rule create_passage_image:
     output:
         out=f"{PARENT_DIR}/expe-jena/docker/jena-latest.tar"
     input:
+        jar=f"{PARENT_DIR}/expe-jena/jena-cli-jar-with-dependencies.jar",
         dockerfile=f"{PARENT_DIR}/expe-jena/Dockerfile"
     shell:
         """
