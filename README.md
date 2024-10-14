@@ -21,7 +21,7 @@ It contains 2 subdirectories: `./selected_queries/wdbench-mulitple-tps` and `./s
 The first contains queries that have multiple triple patterns, and the second contains queries that have optional patterns.
 Those queries were taken from 1 to 5 minutes for execution ni Blazegraph under single virtual CPU.
 - `./passage`: Contains the source code of the PASSAGE implementation. Please refer to the README.md file in this directory for more information.
-- `./passage-communica`: PASSAGE x Communica. The extension of Communica smart client for supporting all .
+- `./passage-communica`: PASSAGE x Communica. The extension of Communica smart client for supporting all SPARQL.
 Please also refer to the README.md file in this directory for more information.
 - `./expe-blazegraph-baseline`, `./expe-jena`, `./expe-sage`,`./expe-passage`: Contains the scripts used to run the experiments for 
 comparing the performance of Blazegraph, Jena, Sage, and PASSAGE. 
