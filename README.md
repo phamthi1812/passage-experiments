@@ -15,7 +15,7 @@ server passage ensures completeness and responsiveness with a high level of perf
 
 ## Organization the repository
 - `./datasets`: You can download from the [git repo](https://github.com/MillenniumDB/WDBench) for different formats of the dataset.
-We'll need JNL for Blazegraph and PASSAGE experiments, TDB2 for Jena experiments, and HDT for Sage experiments.
+We'll need JNL for Blazegraph and PASSAGE, TDB2 for Jena, and HDT for Sage experiments.
 - `./selected_queries`: Contains the queries used in the experiments, which are a subset of WDBench benchmark that do not contain cartesian products. 
 It contains 2 subdirectories: `./selected_queries/wdbench-mulitple-tps` and `./selected_queries/wdbench-opts`. 
 The first contains queries that have multiple triple patterns, and the second contains queries that have optional patterns.
