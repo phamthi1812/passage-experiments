@@ -1,5 +1,5 @@
 # passage-experiments
-This repository contains the experiments in the paper "passage: Ensuring Completeness and Responsiveness of PublicSPARQL Endpoints with SPARQL Continuation Queries"
+This repository contains the experiments in the paper "PASSAGE: Ensuring Completeness and Responsiveness of PublicSPARQL Endpoints with SPARQL Continuation Queries"
 
 ## Abstract
 Being able to query online public knowledge graphs such as Wiki-data or DBPedia is extremely valuable. 
@@ -14,8 +14,8 @@ queries until the complete results are obtained. In our experimentation, we show
 server passage ensures completeness and responsiveness with a high level of performance.
 
 ## Organization the repository
-- `./datasets`: Contains the WDBench used in the experiments under different formats (TDB2, HDT, and JNL). 
-As the dataset is large, we provide a script to download the dataset in jnl. About the TDB2 and HDT formats, you can download and ingest them by yourself.
+- `./datasets`: You can download from the [git repo](https://github.com/MillenniumDB/WDBench) for different formats of the dataset.
+We'll need JNL for Blazegraph and PASSAGE experiments, TDB2 for Jena experiments, and HDT for Sage experiments.
 - `./selected_queries`: Contains the queries used in the experiments, which are a subset of WDBench benchmark that do not contain cartesian products. 
 It contains 2 subdirectories: `./selected_queries/wdbench-mulitple-tps` and `./selected_queries/wdbench-opts`. 
 The first contains queries that have multiple triple patterns, and the second contains queries that have optional patterns.
@@ -31,6 +31,21 @@ comparing the performance of Blazegraph, Jena, Sage, and PASSAGE.
 ## Steps to reproduce the experiments
 
 1. Clone the repository
-2. Download the dataset in JNL format by running the script `./datasets/Snakefile`
+2. Download the dataset in all needed formats and put them in `./datasets`
 3. Refer to each README of the Blazegraph, PASSAGE to produce the necessary jar files for the experiments.
+4. For Jena, we took the newest version of Jena, which is 5.1.0, already available inside the `./expe-jena` directory.
+5. For Sage, we created a docker image that contains the necessary setup for the experiments.
+
+We also provide the docker images for each engine's experiments in their respective directories. 
+You can reproduce all the experiments by running the Snakemake file in the root directory of the repository.
+
+```bash 
+snakemake -p -s Snakefile -c1
+```
+
+You can also run the experiments individually by defining the config as described in Snakefile.
+
+
+
+
 
