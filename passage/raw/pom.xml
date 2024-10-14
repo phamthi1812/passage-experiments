@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.gdd</groupId>
+        <artifactId>passage</artifactId>
+        <version>0.0.1</version>
+    </parent>
+
+    <artifactId>raw</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.gdd</groupId>
+            <artifactId>jena-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.gdd</groupId>
+            <artifactId>passage-volcano</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.gdd</groupId>
+            <artifactId>passage-blazegraph</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>fr.gdd</groupId>
+            <artifactId>passage-databases</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency> <!-- because blazegraph uses junit4 while we use junit5… -->
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
