@@ -10,7 +10,6 @@ continuation query; until termination.
 ## Installation
 
 ```shell
-git clone https://github.com/Chat-Wane/passage.git
 cd passage
 
 mvn clean package
