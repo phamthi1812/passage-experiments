@@ -2,23 +2,6 @@ import os
 import glob
 from pathlib import Path
 
-# Configurable CPU count for Docker
-PARENT_DIR = "/GDD/sage-jena-benchmarks"
-
-cpus = config.get("cpus", 1)
-
-query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
-run_ids = config.get("run_ids", ["run_1", "run_2", "run_3"])
-
-# Function to collect queries from each QUERY_DIR
-def get_queries(query_dir):
-    return [Path(f).stem for f in glob.glob(f"{PARENT_DIR}/selected_queries/{query_dir}/*.sparql")]
-
-rule all:
-    input:
-        expand(f"{PARENT_DIR}/expe-jena/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv", run_id=run_ids, query_dir=query_dirs, cpus=[cpus])
-
-
 rule execute_one_query:
     input:
         img=f"{PARENT_DIR}/expe-jena/docker/jena-latest.tar",

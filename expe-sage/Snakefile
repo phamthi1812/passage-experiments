@@ -2,27 +2,6 @@ import os
 import glob
 from pathlib import Path
 
-# Configurable CPU count for Docker
-PARENT_DIR = "/GDD/experiments/sage-jena-benchmarks"
-
-cpus = config.get("cpus", 1)
-
-query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
-run_ids = config.get("run_ids", ["run_1","run_2", "run_3"])
-timeouts = config.get("timeouts", [60000,60000000])  # 1 minute, could be 2 minutes, 1 hour (like notimeout)
-
-
-# Function to collect queries from each QUERY_DIR
-def get_queries(query_dir):
-    return [Path(f).stem for f in glob.glob(f"{PARENT_DIR}/selected_queries/{query_dir}/*.sparql")]
-
-
-rule all:
-    input:
-        expand(f"{PARENT_DIR}/expe-sage/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv",
-               query_dir=query_dirs, cpus=[cpus])
-
-
 rule execute_one_query:
     input:
         img=f"{PARENT_DIR}/expe-sage/docker/sage-latest.tar",
@@ -34,6 +13,16 @@ rule execute_one_query:
         nb_results=temp(f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.nb.dat"),
         time=temp(f"{PARENT_DIR}/expe-sage/{{query_dir}}/{{cpus}}-cpus/{{timeout}}/{{run_id}}/{{query}}.time.dat")
     run:
+        # Update the quota in the config file based on the timeout
+        with open(input.config_file, "r") as config_file:
+            config_content = config_file.read()
+
+        # Modify the quota value to match the current timeout
+        new_config_content = config_content.replace(f"quota: 60000000", f"quota: {wildcards.timeout}")
+
+        # Write the modified config back to the config file
+        with open(input.config_file, "w") as config_file:
+            config_file.write(new_config_content)
         query_name = Path(input.query).stem
         docker_config = "/config.yaml"
         docker_query_file = f"/{Path(input.query).name}"
@@ -44,7 +33,7 @@ rule execute_one_query:
 
         with open(launch_file, "w") as launch:
             launch.write(f"""#!/bin/bash
-sage-exec {docker_config} http://example.org/wdbench -f {docker_query_file} --timeout {wildcards.timeout} &> {docker_result}
+sage-exec {docker_config} http://example.org/wdbench -f {docker_query_file} --timeout 60000000 &> {docker_result}
 
 # Extract values from the last line of docker_result
 last_line=$(tail -n 1 {docker_result})
