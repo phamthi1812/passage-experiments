@@ -13,3 +13,5 @@ Please also refer to the README.md file in this directory for more information.
 - `./expe-blazegraph-baseline`, `./expe-jena`, `./expe-sage`,`./expe-passage`: Contains the scripts used to run the experiments for 
 comparing the performance of Blazegraph, Jena, Sage, and PASSAGE. 
 - Snakemake file: Contains the workflow for running the experiments.
+- `./blazegraph-cli`: For producing blazegraph CLI commands in Blazegraph experiments. You can find the README.md file in this directory for more information.
+
