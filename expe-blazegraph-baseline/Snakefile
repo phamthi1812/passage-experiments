@@ -2,23 +2,6 @@ import os
 import glob
 from pathlib import Path
 
-# Configurable CPU count for Docker
-PARENT_DIR = "/GDD/Thi/sage-jena-benchmarks"
-
-cpus = config.get("cpus", 1)
-
-query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
-run_ids = config.get("run_ids", ["run_1","run_2","run_3"])
-
-# Function to collect queries from each QUERY_DIR
-def get_queries(query_dir):
-    return [Path(f).stem for f in glob.glob(f"{PARENT_DIR}/selected_queries/{query_dir}/*.sparql")]
-
-rule all:
-    input:
-        expand(f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/report-{{query_dir}}-{{cpus}}-cpus.csv", run_id=run_ids, query_dir=query_dirs, cpus=[cpus])
-
-
 rule execute_one_query:
     input:
         img=f"{PARENT_DIR}/expe-blazegraph-baseline/docker/bg-cli.tar",
@@ -27,8 +10,8 @@ rule execute_one_query:
         query=lambda wildcards: f"{PARENT_DIR}/selected_queries/{wildcards.query_dir}/{wildcards.query}.sparql"
     output:
         result=temp(f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.dat"),
-        nb_results=f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.nb.dat",
-        time=f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.time.dat"
+        nb_results=temp(f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.nb.dat"),
+        time=temp(f"{PARENT_DIR}/expe-blazegraph-baseline/{{query_dir}}/{{cpus}}-cpus/{{run_id}}/{{query}}.time.dat")
     run:
         query_name = Path(input.query).stem
         docker_query_file = f"/{Path(input.query).name}"

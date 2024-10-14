@@ -1,0 +1,60 @@
+## If you already have the datasets somewhere, consider creating a symbolic
+## link to avoid copying it multiples times. For instance:
+## `ln -s path/to/your/dataset/wdbecnh.jnl datasets/wdbench-blaze/wdbench.jnl`
+
+## but then, if you use docker to run the experiments, do not forget to
+## create a volume targeting the real resources.
+
+DATA_DIR = "datasets" # current folder 
+
+rule download_wdbench_in_blazegraph: # This is a ~50GB download.
+    output:
+        "wdbench-blaze.zip-part-aa",
+        "wdbench-blaze.zip-part-ab",
+        "wdbench-blaze.zip-part-ac",
+        "wdbench-blaze.zip-part-ad",
+        "wdbench-blaze.zip-part-ae",
+        "wdbench-blaze.zip-part-af",
+        "wdbench-blaze.zip-part-ag",
+        "wdbench-blaze.zip-part-ah",
+        "wdbench-blaze.zip-part-ai",
+        "wdbench-blaze.zip-part-aj"
+    shell:
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-aa && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-ab && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-ac && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-ad && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-ae && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-af && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-ag && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-ah && "
+        "wget -nc https://zenodo.org/records/12510935/files/wdbench-blaze.zip-part-ai && "
+        "wget -nc https://zenodo.org/records/12511050/files/wdbench-blaze.zip-part-aj"
+
+rule unsplit_wdbench_in_blazegraph:
+    output:
+        "wdbench-blaze.zip"
+    input:
+        "wdbench-blaze.zip-part-aa",
+        "wdbench-blaze.zip-part-ab",
+        "wdbench-blaze.zip-part-ac",
+        "wdbench-blaze.zip-part-ad",
+        "wdbench-blaze.zip-part-ae",
+        "wdbench-blaze.zip-part-af",
+        "wdbench-blaze.zip-part-ag",
+        "wdbench-blaze.zip-part-ah",
+        "wdbench-blaze.zip-part-ai",
+        "wdbench-blaze.zip-part-aj"
+    shell:
+        "cat wdbench-blaze.zip-part-* > wdbench-blaze.zip && "
+        "rm wdbench-blaze.zip-part-*"
+
+rule unzip_wdbench_in_blazegraph:
+    output:
+        directory(f"{DATA_DIR}/wdbench-blaze"),
+        f"{DATA_DIR}/wdbench-blaze/wdbench-blaze.jnl"
+    input:
+        "wdbench-blaze.zip"
+    shell:
+        f"unzip wdbench-blaze.zip -d {DATA_DIR}/ && "
+        "rm wdbench-blaze.zip"

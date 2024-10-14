@@ -14,8 +14,6 @@ def extract_queries_and_reports(dat_file, query, report_csv, parent_dir, result_
 
     query_pattern = re.compile(
             r'To\ continue\ query\ execution,\ use\ the\ following\ query:\x1b\[0m[\s\S]*?\x1b\[0m')
-    #query_pattern = re.compile(r'To\ continue\ query\ execution,\ use\ the\ following\ query:\s*(\{[\s\S]*?\})\s*(?=To\ continue|$)')
-
     block_pattern = re.compile(
         r'\x1b\[1;35mNumber of pause/resume: \x1b\[0m (\d+)\n'
         r'\x1b\[1;35mExecution time: \x1b\[0m (\d+) ms\n'
@@ -43,7 +41,6 @@ def extract_queries_and_reports(dat_file, query, report_csv, parent_dir, result_
             outfile.write(f"Number of results: {num_results}\n")
             outfile.write("\n")
 
-        # Handle the final block (total)
         total_block_pattern = re.compile(
             r'\x1b\[1;35mTOTAL number of pause/resume: \x1b\[0m (\d+)\n'
             r'\x1b\[1;35mTOTAL execution time: \x1b\[0m (\d+) ms\n'
