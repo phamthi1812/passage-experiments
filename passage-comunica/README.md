@@ -17,6 +17,6 @@ yarn install
 
 # It runs similarly to your good old Comunica
 yarn run query-passage \
-    http://localhost:3000/watdiv10M.jnl/passage \
+    http://localhost:3000/wdbench.jnl/passage \
     -f path/to/query --logLevel=debug > results.dat
 ```
