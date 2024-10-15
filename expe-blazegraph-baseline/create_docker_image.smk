@@ -1,5 +1,5 @@
 
-PARENT_DIR = "/GDD/Thi/sage-jena-benchmarks"
+PARENT_DIR = "/GDD/Thi/passage-experiments"
 
 rule create_passage_image:
     output:

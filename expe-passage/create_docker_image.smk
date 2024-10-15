@@ -1,7 +1,7 @@
 
 
 
-PARENT_DIR = "/GDD/experiments/sage-jena-benchmarks"
+PARENT_DIR = "/GDD/passage-experiments"
 
 rule create_passage_image:
     output:
