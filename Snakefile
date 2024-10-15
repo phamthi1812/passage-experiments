@@ -3,7 +3,7 @@ import glob
 from pathlib import Path
 
 engine = config.get("engine", "blazegraph-baseline")  # Choose engine: 'blazegraph-baseline', 'jena', 'sage', 'passage'
-PARENT_DIR = config.get("parent_dir", "/GDD/Thi/sage-jena-benchmarks")
+PARENT_DIR = config.get("parent_dir", "/GDD/Thi/passage-experiments")  # Path to the parent directory
 cpus = config.get("cpus", 1)
 query_dirs = config.get("query_dirs", ["wdbench-multiple-tps", "wdbench-opts"])
 run_ids = config.get("run_ids", ["run_1", "run_2", "run_3"])
