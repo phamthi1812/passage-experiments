@@ -13,12 +13,6 @@ If the continuation query is also interrupted, the process repeats, generating f
 queries until the complete results are obtained. In our experimentation, we show that our continuation
 server passage ensures completeness and responsiveness with a high level of performance.
 
-## Live Demo
-You can access the live demo of the PASSAGExCommunica at [PASSAGExCommunica-LiveDemo](https://live-demo-4455226726.europe-west2.run.app/)
-The demo uses the Communica smart client to query the PASSAGE SPARQL endpoint.
-
-[NOTE] We set the timeout for the queries to 5 seconds as the demo is running on WatDiv10M dataset.
-
 
 
 ## Organization the repository
