@@ -17,7 +17,7 @@ It is also possible to communicate with the PASSAGE server without using Comunic
 ```bash
 curl -X POST -d "query=SELECT * WHERE \
 {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?c . \
-?s ?p ?o}"
+?s ?p ?o}" \
 https://live-demo-4455226726.europe-west2.run.app/watdiv10M.jnl/passage
 ```
 It returns the partial results and the continuation query in JSON format. The last mapping of the first partial result along with the continuation query is as follows:
