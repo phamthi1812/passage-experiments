@@ -6,6 +6,8 @@ Being able to query online public knowledge graphs such as Wikidata or DBpedia i
 ## 🌐 Live Demo
 You can access the live demo of PASSAGE at [Live Demo PASSAGE](https://live-demo-4455226726.europe-west2.run.app/)
 
+💡 **Note**: It might take around 30s to transfer and print the results on the client side.
+
 In this demo:
 - We installed the WatDiv10M dataset in the PASSAGE server. As the PASSAGE server is built on top of Blazegraph, we ingested the WatDiv10M dataset in PASSAGE using the standard Blazegraph import procedure.
 - We updated Comunica as a smart client to support all PASSAGE's capabilities.
@@ -33,8 +35,6 @@ It returns the partial results and the continuation query in JSON format. The la
   }
 }
 ```
-
-💡 **Note**: It might take around 30s to transfer and print the results on the client side.
 
 ## 🗂️ Organization of the Repository
 - `./datasets`: You can download different formats of the dataset from the [git repo](https://github.com/MillenniumDB/WDBench). We'll need JNL for Blazegraph and PASSAGE, TDB2 for Jena, and HDT for Sage experiments.
